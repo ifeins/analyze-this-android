@@ -21,6 +21,8 @@ import com.example.ifeins.analyze.R;
 import com.example.ifeins.analyze.models.Transaction;
 import com.example.ifeins.analyze.views.TransactionRowView;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -32,6 +34,11 @@ public class TransactionsAdapter extends BaseAdapter {
 
     private final Context mContext;
     private List<Transaction> mTransactions;
+
+    public TransactionsAdapter(Context context) {
+        mContext = context;
+        mTransactions = new ArrayList<>();
+    }
 
     public TransactionsAdapter(Context context, List<Transaction> transactions) {
         mContext = context;

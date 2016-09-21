@@ -49,6 +49,11 @@ public class Merchant implements Parcelable {
         dest.writeParcelable(category, flags);
     }
 
+    @Override
+    public String toString() {
+        return name;
+    }
+
     public static final Creator<Merchant> CREATOR = new Creator<Merchant>() {
         @Override
         public Merchant createFromParcel(Parcel in) {

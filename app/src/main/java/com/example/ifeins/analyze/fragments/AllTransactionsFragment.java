@@ -13,19 +13,15 @@ import com.example.ifeins.analyze.R;
 import com.example.ifeins.analyze.activities.MainActivity;
 import com.example.ifeins.analyze.adapters.TransactionsAdapter;
 import com.example.ifeins.analyze.models.Transaction;
+import com.example.ifeins.analyze.utils.AmountValueFormatter;
+import com.example.ifeins.analyze.utils.MonthValueFormatter;
 import com.github.mikephil.charting.charts.BarChart;
-import com.github.mikephil.charting.components.AxisBase;
-import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.formatter.AxisValueFormatter;
-import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
-import com.github.mikephil.charting.utils.ViewPortHandler;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
@@ -69,17 +65,14 @@ public class AllTransactionsFragment extends Fragment implements TransactionsFra
 
         mBarChartView = (BarChart) view.findViewById(R.id.bar_chart);
         mBarChartView.setDescription(null);
-
         XAxis xAxis = mBarChartView.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setDrawGridLines(false);
         xAxis.setGranularity(1f);
         xAxis.setValueFormatter(new MonthValueFormatter());
-
         YAxis axisLeft = mBarChartView.getAxisLeft();
         axisLeft.setValueFormatter(new AmountValueFormatter());
         axisLeft.setPosition(YAxis.YAxisLabelPosition.OUTSIDE_CHART);
-
         mBarChartView.getAxisRight().setDrawLabels(false);
 
         MainActivity activity = (MainActivity) getActivity();
@@ -137,33 +130,6 @@ public class AllTransactionsFragment extends Fragment implements TransactionsFra
             mBarChartView.setData(data);
             mBarChartView.invalidate();
             mBarChartView.animateXY(BAR_ANIMATION_DURATION_MILLIS, BAR_ANIMATION_DURATION_MILLIS);
-        }
-    }
-
-    private static class MonthValueFormatter implements AxisValueFormatter {
-
-        @Override
-        public String getFormattedValue(float value, AxisBase axis) {
-            LocalDate date = new LocalDate(2000, (int) value, 1);
-            return date.toString("MMM");
-        }
-
-        @Override
-        public int getDecimalDigits() {
-            return 0;
-        }
-    }
-
-    private static class AmountValueFormatter implements AxisValueFormatter {
-
-        @Override
-        public String getFormattedValue(float value, AxisBase axis) {
-            return String.format("₪%d", Math.round(value));
-        }
-
-        @Override
-        public int getDecimalDigits() {
-            return 0;
         }
     }
 
