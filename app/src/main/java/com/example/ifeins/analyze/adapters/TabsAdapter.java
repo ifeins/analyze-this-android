@@ -18,6 +18,7 @@ import android.support.v4.util.Pair;
 
 import com.example.ifeins.analyze.fragments.AllTransactionsFragment;
 import com.example.ifeins.analyze.fragments.ByCategoryFragment;
+import com.example.ifeins.analyze.fragments.ByMerchantFragment;
 import com.example.ifeins.analyze.fragments.OverviewFragment;
 
 import java.util.ArrayList;
@@ -35,8 +36,9 @@ public class TabsAdapter extends FragmentPagerAdapter {
     public TabsAdapter(FragmentManager fm) {
         super(fm);
         mFragments.add(new Pair<String, Fragment>("Overview", new OverviewFragment()));
-        mFragments.add(new Pair<String, Fragment>("All transactions", new AllTransactionsFragment()));
-        mFragments.add(new Pair<String, Fragment>("Transactions by category", new ByCategoryFragment()));
+        mFragments.add(new Pair<String, Fragment>("All", new AllTransactionsFragment()));
+        mFragments.add(new Pair<String, Fragment>("By category", new ByCategoryFragment()));
+        mFragments.add(new Pair<String, Fragment>("By merchant", new ByMerchantFragment()));
     }
 
     @Override
@@ -46,7 +48,7 @@ public class TabsAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getCount() {
-        return 3;
+        return mFragments.size();
     }
 
     @Override
