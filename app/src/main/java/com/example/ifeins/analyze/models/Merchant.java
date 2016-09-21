@@ -29,9 +29,12 @@ public class Merchant implements Parcelable {
     @SerializedName("logo_url")
     public String logoUrl;
 
+    public Category category;
+
     protected Merchant(Parcel in) {
         name = in.readString();
         logoUrl = in.readString();
+        category = in.readParcelable(Category.class.getClassLoader());
     }
 
     @Override
@@ -43,6 +46,7 @@ public class Merchant implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(name);
         dest.writeString(logoUrl);
+        dest.writeParcelable(category, flags);
     }
 
     public static final Creator<Merchant> CREATOR = new Creator<Merchant>() {

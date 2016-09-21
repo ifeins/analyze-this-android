@@ -97,17 +97,7 @@ public class AllTransactionsFragment extends Fragment implements TransactionsFra
             addTransactionsToChart(transactions);
         }
     }
-
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        if (isVisibleToUser) {
-            if (mBarChartView.getData().getDataSetCount() > 0) {
-                mBarChartView.animateXY(BAR_ANIMATION_DURATION_MILLIS, BAR_ANIMATION_DURATION_MILLIS);
-            }
-        }
-    }
-
+    
     private List<BarEntry> transactionsToBarEntries(final List<Transaction> transactions) {
         Function<Transaction, Integer> transactionDateFunction = new Function<Transaction, Integer>() {
             @Override
