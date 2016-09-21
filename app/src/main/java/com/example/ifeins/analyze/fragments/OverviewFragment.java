@@ -8,11 +8,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.ifeins.analyze.R;
+import com.example.ifeins.analyze.models.Transaction;
+
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class OverviewFragment extends Fragment {
+public class OverviewFragment extends Fragment implements TransactionsFragment {
 
     public OverviewFragment() {
         // Required empty public constructor
@@ -25,4 +28,8 @@ public class OverviewFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_overview, container, false);
     }
 
+    @Override
+    public void setTransactions(List<Transaction> transactions) {
+
+    }
 }

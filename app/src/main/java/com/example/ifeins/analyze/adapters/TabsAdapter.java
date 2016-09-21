@@ -14,34 +14,34 @@ package com.example.ifeins.analyze.adapters;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.util.Pair;
 
 import com.example.ifeins.analyze.fragments.AllTransactionsFragment;
 import com.example.ifeins.analyze.fragments.ByCategoryFragment;
 import com.example.ifeins.analyze.fragments.OverviewFragment;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * TODO: Write Javadoc for MyAdapter.
+ * TODO: Write Javadoc for TabsAdapter.
  *
  * @author ifeins
  */
-public class MyAdapter extends FragmentPagerAdapter {
+public class TabsAdapter extends FragmentPagerAdapter {
 
-    public MyAdapter(FragmentManager fm) {
+    private List<Pair<String, Fragment>> mFragments = new ArrayList<>();
+
+    public TabsAdapter(FragmentManager fm) {
         super(fm);
+        mFragments.add(new Pair<String, Fragment>("Overview", new OverviewFragment()));
+        mFragments.add(new Pair<String, Fragment>("All transactions", new AllTransactionsFragment()));
+        mFragments.add(new Pair<String, Fragment>("Transactions by category", new ByCategoryFragment()));
     }
 
     @Override
     public Fragment getItem(int position) {
-        switch (position) {
-            case 0:
-                return new OverviewFragment();
-            case 1:
-                return new AllTransactionsFragment();
-            case 2:
-                return new ByCategoryFragment();
-            default:
-                throw new IllegalArgumentException("Unsupported tab");
-        }
+        return mFragments.get(position).second;
     }
 
     @Override
@@ -51,15 +51,6 @@ public class MyAdapter extends FragmentPagerAdapter {
 
     @Override
     public CharSequence getPageTitle(int position) {
-        switch (position) {
-            case 0:
-                return "Overview";
-            case 1:
-                return "All transactions";
-            case 2:
-                return "Transactions by category";
-            default:
-                throw new IllegalArgumentException("Unsupported tab");
-        }
+        return mFragments.get(position).first;
     }
 }
