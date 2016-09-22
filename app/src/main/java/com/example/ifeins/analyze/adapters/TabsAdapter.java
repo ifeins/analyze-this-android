@@ -38,7 +38,7 @@ public class TabsAdapter extends FragmentPagerAdapter {
         mFragments.add(new Pair<String, Fragment>("Overview", new OverviewFragment()));
         mFragments.add(new Pair<String, Fragment>("All", new AllTransactionsFragment()));
         mFragments.add(new Pair<String, Fragment>("By category", new ByCategoryFragment()));
-        mFragments.add(new Pair<String, Fragment>("By merchant", new ByMerchantFragment()));
+//        mFragments.add(new Pair<String, Fragment>("By merchant", new ByMerchantFragment()));
     }
 
     @Override

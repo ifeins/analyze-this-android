@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void fetchTransactions() {
         Retrofit retrofit = new Retrofit.Builder().
-                baseUrl("http://0cf2e065.ngrok.io/").
+                baseUrl("http://analyze-this-floyd.herokuapp.com/").
                 addConverterFactory(GsonConverterFactory.create()).
                 build();
         AnalyzeApi analyzeApi = retrofit.create(AnalyzeApi.class);
