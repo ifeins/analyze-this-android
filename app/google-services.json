@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "544374624903",
+    "project_id": "analyze-this"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:544374624903:android:a2be0d4b82e98777",
+        "android_client_info": {
+          "package_name": "com.example.ifeins.analyze"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "544374624903-4u2q1ero0oacr8i31n322bpkr8jou0me.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.ifeins.analyze",
+            "certificate_hash": "DC957AB08753B8CEF2683F1A9ADDAFA3D7D27BB3"
+          }
+        },
+        {
+          "client_id": "544374624903-m8q4qjcsm5ndduhf17fj3q8pjbin2uau.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBCyGqy0KpSI84AIELgCsGizv42HHW5fhA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,6 +1,4 @@
 <resources>
     <string name="app_name">Analyze</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="server_client_id" translatable="false">793126400446-sj5b3j1p0ph280fh1mi6dv0odnkg39h6.apps.googleusercontent.com</string>
 </resources>
