@@ -1,0 +1,4 @@
+<resources>
+    <string name="api_base_url" translatable="false">http://analyze-this-floyd.herokuapp.com/</string>
+    <string name="server_client_id" translatable="false">793126400446-sj5b3j1p0ph280fh1mi6dv0odnkg39h6.apps.googleusercontent.com</string>
+</resources>

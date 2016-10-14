@@ -3,8 +3,11 @@ package com.example.ifeins.analyze.activities;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.design.widget.TabLayout;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.TextViewCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.TextView;
 
 import com.example.ifeins.analyze.R;
 import com.example.ifeins.analyze.adapters.TabsAdapter;
@@ -54,8 +57,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void fetchTransactions() {
+        String baseUrl = getString(R.string.api_base_url);
         Retrofit retrofit = new Retrofit.Builder().
-                baseUrl("http://analyze-this-floyd.herokuapp.com/").
+                baseUrl(baseUrl).
                 addConverterFactory(GsonConverterFactory.create()).
                 build();
         AnalyzeApi analyzeApi = retrofit.create(AnalyzeApi.class);

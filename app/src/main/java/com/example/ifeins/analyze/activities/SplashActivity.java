@@ -59,6 +59,7 @@ public class SplashActivity extends AppCompatActivity implements GoogleApiClient
                 String displayName = account.getDisplayName();
                 String email = account.getEmail();
                 startActivity(new Intent(this, MainActivity.class));
+                finish();
             }
         }
     }
