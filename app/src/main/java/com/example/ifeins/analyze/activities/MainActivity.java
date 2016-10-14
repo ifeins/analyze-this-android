@@ -1,19 +1,33 @@
 package com.example.ifeins.analyze.activities;
 
+import android.content.Intent;
+import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
-import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.TextViewCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.TextView;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.example.ifeins.analyze.R;
 import com.example.ifeins.analyze.adapters.TabsAdapter;
 import com.example.ifeins.analyze.api.AnalyzeApi;
 import com.example.ifeins.analyze.fragments.TransactionsFragment;
 import com.example.ifeins.analyze.models.Transaction;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.drive.Drive;
+import com.google.android.gms.drive.DriveId;
+import com.google.android.gms.drive.DriveResource;
+import com.google.android.gms.drive.OpenFileActivityBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,14 +38,20 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private static final String STATE_TRANSACTIONS = "transactions";
+    private static final String LOG_TAG = MainActivity.class.getSimpleName();
+    public static final int RC_OPEN_FILE = 1;
+    public static final int RC_RESOLVE_CONNECTION = 2;
+    public static final int RC_ERROR_DIALOG = 3;
 
     private TabsAdapter mAdapter;
     private ViewPager mViewPager;
 
     private List<Transaction> mTransactions = new ArrayList<>();
+    private GoogleApiClient mGoogleApiClient;
+    private DisplayFileTitleCallback mDisplayFileTitleCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +73,70 @@ public class MainActivity extends AppCompatActivity {
             updateFragments();
         } else {
             fetchTransactions();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addApi(Drive.API)
+                    .addScope(Drive.SCOPE_FILE)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .build();
+        }
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    protected void onPause() {
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.disconnect();
+        }
+        super.onPause();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_item_import_file:
+                showImportFileDialog();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void showImportFileDialog() {
+        IntentSender intentSender = new OpenFileActivityBuilder().build(mGoogleApiClient);
+        try {
+            startIntentSenderForResult(intentSender, RC_OPEN_FILE, null, 0, 0, 0);
+        } catch (IntentSender.SendIntentException e) {
+            Log.e(LOG_TAG, "Could not show open file dialog", e);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case RC_OPEN_FILE:
+                if (resultCode == RESULT_OK) {
+                    DriveId fileId = data.getParcelableExtra(OpenFileActivityBuilder.EXTRA_RESPONSE_DRIVE_ID);
+                    PendingResult<DriveResource.MetadataResult> result = fileId.asDriveFile().getMetadata(mGoogleApiClient);
+                    mDisplayFileTitleCallback = new DisplayFileTitleCallback();
+                    result.setResultCallback(mDisplayFileTitleCallback);
+                }
+                break;
+            default:
+                super.onActivityResult(requestCode, resultCode, data);
         }
     }
 
@@ -95,5 +179,45 @@ public class MainActivity extends AppCompatActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList(STATE_TRANSACTIONS, (ArrayList<? extends Parcelable>) mTransactions);
+    }
+
+    /** Google API callbacks **/
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        if (connectionResult.hasResolution()) {
+            try {
+                connectionResult.startResolutionForResult(this, RC_RESOLVE_CONNECTION);
+            } catch (IntentSender.SendIntentException e) {
+                Log.e(LOG_TAG, "Unable to resolve", e);
+            }
+        } else {
+            GoogleApiAvailability.getInstance().getErrorDialog(this, connectionResult.getErrorCode(), RC_ERROR_DIALOG).show();
+        }
+    }
+
+    /** End Google API callbacks **/
+
+    private class DisplayFileTitleCallback implements ResultCallback<DriveResource.MetadataResult> {
+
+        @Override
+        public void onResult(@NonNull DriveResource.MetadataResult metadataResult) {
+            if (metadataResult.getStatus().isSuccess()) {
+                Toast.makeText(MainActivity.this,
+                        "File opened: " + metadataResult.getMetadata().getTitle(),
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                String errorMessage = metadataResult.getStatus().getStatusMessage();
+                Toast.makeText(MainActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }
