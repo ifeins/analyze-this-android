@@ -17,8 +17,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.example.ifeins.analyze.R;
+import com.example.ifeins.analyze.api.AnalyzeApi;
+import com.example.ifeins.analyze.api.AnalyzeApiHelper;
+import com.example.ifeins.analyze.models.User;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -29,6 +33,11 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * @author ifeins
@@ -63,7 +72,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
             }
         }
     }
-
+    
     @OnClick(R.id.btn_sign_in)
     void startSignIn() {
         GoogleSignInOptions signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -80,6 +89,20 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
     }
 
     private void syncWithServer(String idToken) {
-        
+        AnalyzeApi api = AnalyzeApiHelper.createApi(this);
+        Call<User> signInCall = api.signIn(idToken);
+        signInCall.enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                User.setCurrentUser(response.body());
+                startActivity(new Intent(SignInActivity.this, MainActivity.class));
+                finish();
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                Toast.makeText(SignInActivity.this, "Could not sign in", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

@@ -17,6 +17,7 @@ import android.widget.Toast;
 import com.example.ifeins.analyze.R;
 import com.example.ifeins.analyze.adapters.TabsAdapter;
 import com.example.ifeins.analyze.api.AnalyzeApi;
+import com.example.ifeins.analyze.api.AnalyzeApiHelper;
 import com.example.ifeins.analyze.fragments.TransactionsFragment;
 import com.example.ifeins.analyze.models.Transaction;
 import com.google.android.gms.common.ConnectionResult;
@@ -141,14 +142,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     private void fetchTransactions() {
-        String baseUrl = getString(R.string.api_base_url);
-        Retrofit retrofit = new Retrofit.Builder().
-                baseUrl(baseUrl).
-                addConverterFactory(GsonConverterFactory.create()).
-                build();
-        AnalyzeApi analyzeApi = retrofit.create(AnalyzeApi.class);
-
-        Call<List<Transaction>> transactionsCall = analyzeApi.getTransactions();
+        AnalyzeApi api = AnalyzeApiHelper.createApi(this);
+        Call<List<Transaction>> transactionsCall = api.getTransactions();
         transactionsCall.enqueue(new Callback<List<Transaction>>() {
             @Override
             public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
