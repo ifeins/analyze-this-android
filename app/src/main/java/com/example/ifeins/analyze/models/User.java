@@ -21,21 +21,36 @@ public class User implements Parcelable {
 
     private static User sCurrentUser;
 
+    private long id;
+
     private String email;
 
     private String name;
 
-    public static void setCurrentUser(User user) {
+    public synchronized static void setCurrentUser(User user) {
         sCurrentUser = user;
     }
 
-    public static User getCurrentUser() {
+    public synchronized static User getCurrentUser() {
         return sCurrentUser;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getName() {
+        return name;
     }
 
     /** Parcelable implementation start **/
 
     protected User(Parcel in) {
+        id = in.readLong();
         email = in.readString();
         name = in.readString();
     }
@@ -47,6 +62,7 @@ public class User implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(id);
         dest.writeString(email);
         dest.writeString(name);
     }
