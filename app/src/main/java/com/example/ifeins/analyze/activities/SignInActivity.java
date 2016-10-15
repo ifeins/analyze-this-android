@@ -72,12 +72,13 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
             }
         }
     }
-    
+
     @OnClick(R.id.btn_sign_in)
     void startSignIn() {
         GoogleSignInOptions signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.server_client_id))
                 .requestEmail()
+                .requestProfile()
                 .build();
         GoogleApiClient apiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this, this)

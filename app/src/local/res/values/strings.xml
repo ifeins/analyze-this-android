@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">Analyze - Local</string>
     <string name="api_base_url">http://10.0.3.2:3000/</string>
-    <string name="server_client_id">778451504822-v4r45iqpq8nc1mp25i6u02gci30vu7ed.apps.googleusercontent.com</string>
+    <string name="server_client_id">538155425042-vd5dsa2ss71qjc3flgeilnf1vj33lmja.apps.googleusercontent.com</string>
 </resources>
