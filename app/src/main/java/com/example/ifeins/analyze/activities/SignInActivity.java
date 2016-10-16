@@ -95,9 +95,13 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         signInCall.enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
-                User.setCurrentUser(response.body());
-                startActivity(new Intent(SignInActivity.this, MainActivity.class));
-                finish();
+                if (response.isSuccessful()) {
+                    User.setCurrentUser(response.body());
+                    startActivity(new Intent(SignInActivity.this, MainActivity.class));
+                    finish();
+                } else {
+                    Toast.makeText(SignInActivity.this, "Could not sign in", Toast.LENGTH_SHORT).show();
+                }
             }
 
             @Override
