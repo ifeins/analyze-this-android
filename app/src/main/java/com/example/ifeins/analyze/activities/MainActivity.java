@@ -18,7 +18,6 @@ import com.example.ifeins.analyze.R;
 import com.example.ifeins.analyze.adapters.TabsAdapter;
 import com.example.ifeins.analyze.api.AnalyzeApi;
 import com.example.ifeins.analyze.api.AnalyzeApiHelper;
-import com.example.ifeins.analyze.fragments.TransactionsFragment;
 import com.example.ifeins.analyze.models.Transaction;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -36,12 +35,12 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private static final String STATE_TRANSACTIONS = "transactions";
+    private static final String STATE_TRANSACTIONS_FETCHED = "transactions_fetched";
+
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
     public static final int RC_OPEN_FILE = 1;
     public static final int RC_RESOLVE_CONNECTION = 2;
@@ -53,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private List<Transaction> mTransactions = new ArrayList<>();
     private GoogleApiClient mGoogleApiClient;
     private DisplayFileTitleCallback mDisplayFileTitleCallback;
+    private boolean mTransactionsFetched;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,10 +68,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         if (savedInstanceState != null) {
             mTransactions = savedInstanceState.getParcelableArrayList(STATE_TRANSACTIONS);
+            mTransactionsFetched = savedInstanceState.getBoolean(STATE_TRANSACTIONS_FETCHED);
         }
 
-        if (mTransactions != null && !mTransactions.isEmpty()) {
-            updateFragments();
+        if (mTransactionsFetched) {
+            mAdapter.setTransactions(mTransactions);
         } else {
             fetchTransactions();
         }
@@ -148,7 +149,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             @Override
             public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
                 mTransactions = response.body();
-                updateFragments();
+                mTransactionsFetched = true;
+                mAdapter.setTransactions(mTransactions);
             }
 
             @Override
@@ -159,13 +161,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         });
     }
 
-    private void updateFragments() {
-        for (int i = 0; i < mAdapter.getCount(); i++) {
-            TransactionsFragment fragment = (TransactionsFragment) mAdapter.getItem(i);
-            fragment.setTransactions(mTransactions);
-        }
-    }
-
     public List<Transaction> getTransactions() {
         return mTransactions;
     }
@@ -174,6 +169,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList(STATE_TRANSACTIONS, (ArrayList<? extends Parcelable>) mTransactions);
+        outState.putBoolean(STATE_TRANSACTIONS_FETCHED, mTransactionsFetched);
     }
 
     /** Google API callbacks **/
