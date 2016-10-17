@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.example.ifeins.analyze.R;
@@ -47,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public static final int RC_ERROR_DIALOG = 3;
 
     private TabsAdapter mAdapter;
+    private TabLayout mTabLayout;
     private ViewPager mViewPager;
 
     private List<Transaction> mTransactions = new ArrayList<>();
@@ -63,17 +65,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mAdapter);
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
-        tabLayout.setupWithViewPager(mViewPager);
+        mTabLayout = (TabLayout) findViewById(R.id.tab_layout);
+        mTabLayout.setupWithViewPager(mViewPager);
 
         if (savedInstanceState != null) {
             mTransactions = savedInstanceState.getParcelableArrayList(STATE_TRANSACTIONS);
             mTransactionsFetched = savedInstanceState.getBoolean(STATE_TRANSACTIONS_FETCHED);
         }
 
-        if (mTransactionsFetched) {
-            mAdapter.setTransactions(mTransactions);
-        } else {
+        updateTransactions();
+        if (!mTransactionsFetched) {
             fetchTransactions();
         }
     }
@@ -150,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
                 mTransactions = response.body();
                 mTransactionsFetched = true;
-                mAdapter.setTransactions(mTransactions);
+                updateTransactions();
             }
 
             @Override
@@ -159,6 +160,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
 
         });
+    }
+
+    private void updateTransactions() {
+        if (mTransactions == null || mTransactions.isEmpty()) {
+            mTabLayout.setVisibility(View.GONE);
+        } else {
+            mTabLayout.setVisibility(View.VISIBLE);
+        }
+        mAdapter.setTransactions(mTransactions);
     }
 
     public List<Transaction> getTransactions() {

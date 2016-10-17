@@ -45,6 +45,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class SignInActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
     private static final int RC_SIGN_IN = 1;
+    private GoogleApiClient mGoogleApiClient;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -52,11 +53,19 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         setContentView(R.layout.activity_sign_in);
 
         ButterKnife.bind(this);
+        GoogleSignInOptions signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.server_client_id))
+                .requestEmail()
+                .requestProfile()
+                .build();
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this, this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, signInOptions)
+                .build();
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
     }
 
     @Override
@@ -75,17 +84,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
 
     @OnClick(R.id.btn_sign_in)
     void startSignIn() {
-        GoogleSignInOptions signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.server_client_id))
-                .requestEmail()
-                .requestProfile()
-                .build();
-        GoogleApiClient apiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this, this)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, signInOptions)
-                .build();
-
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(apiClient);
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 

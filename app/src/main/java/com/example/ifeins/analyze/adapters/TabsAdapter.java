@@ -28,8 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * TODO: Write Javadoc for TabsAdapter.
- *
  * @author ifeins
  */
 public class TabsAdapter extends FragmentPagerAdapter {
@@ -75,12 +73,13 @@ public class TabsAdapter extends FragmentPagerAdapter {
     public void setTransactions(List<Transaction> transactions) {
         if (transactions == null || transactions.isEmpty()) {
             mTransactionsExist = false;
-            return;
+        } else {
+            mTransactionsExist = true;
+            for (Pair<String, Fragment> pair : mFragments) {
+                ((TransactionsFragment) pair.second).setTransactions(transactions);
+            }
         }
 
-        for (Pair<String, Fragment> pair : mFragments) {
-            ((TransactionsFragment) pair.second).setTransactions(transactions);
-        }
-        mTransactionsExist = true;
+        notifyDataSetChanged();
     }
 }
