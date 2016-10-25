@@ -28,6 +28,7 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.drive.Drive;
 import com.google.android.gms.drive.DriveId;
 import com.google.android.gms.drive.DriveResource;
+import com.google.android.gms.drive.Metadata;
 import com.google.android.gms.drive.OpenFileActivityBuilder;
 
 import java.util.ArrayList;
@@ -212,9 +213,21 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         @Override
         public void onResult(@NonNull DriveResource.MetadataResult metadataResult) {
             if (metadataResult.getStatus().isSuccess()) {
-                Toast.makeText(MainActivity.this,
-                        "File opened: " + metadataResult.getMetadata().getTitle(),
-                        Toast.LENGTH_SHORT).show();
+                Metadata metadata = metadataResult.getMetadata();
+                Toast.makeText(MainActivity.this, "Importing file: " + metadata.getTitle(), Toast.LENGTH_SHORT).show();
+                String driveId = metadata.getDriveId().getResourceId();
+                Call<Void> importCall = AnalyzeApiHelper.createApi(MainActivity.this).importGoogleDriveResource(driveId);
+                importCall.enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        fetchTransactions();
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        Toast.makeText(MainActivity.this, "Failed to import document", Toast.LENGTH_SHORT).show();
+                    }
+                });
             } else {
                 String errorMessage = metadataResult.getStatus().getStatusMessage();
                 Toast.makeText(MainActivity.this, errorMessage, Toast.LENGTH_SHORT).show();

@@ -29,6 +29,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Scope;
+import com.google.android.gms.drive.Drive;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -46,6 +48,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
 
     private static final int RC_SIGN_IN = 1;
     private GoogleApiClient mGoogleApiClient;
+    private static final boolean REFRESH_TOKENS = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -55,8 +58,10 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         ButterKnife.bind(this);
         GoogleSignInOptions signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.server_client_id))
+                .requestServerAuthCode(getString(R.string.server_client_id), REFRESH_TOKENS)
                 .requestEmail()
                 .requestProfile()
+                .requestScopes(new Scope("https://www.googleapis.com/auth/drive.readonly"))
                 .build();
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this, this)
@@ -76,8 +81,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if (result.isSuccess()) {
                 GoogleSignInAccount account = result.getSignInAccount();
-                String idToken = account.getIdToken();
-                syncWithServer(idToken);
+                syncWithServer(account.getIdToken(), account.getServerAuthCode());
             }
         }
     }
@@ -88,9 +92,9 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
-    private void syncWithServer(String idToken) {
+    private void syncWithServer(String idToken, String authCode) {
         AnalyzeApi api = AnalyzeApiHelper.createApi(this);
-        Call<User> signInCall = api.signIn(idToken);
+        Call<User> signInCall = api.signIn(idToken, authCode, REFRESH_TOKENS);
         signInCall.enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
