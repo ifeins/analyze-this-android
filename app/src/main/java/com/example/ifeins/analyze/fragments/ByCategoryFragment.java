@@ -3,6 +3,7 @@ package com.example.ifeins.analyze.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,6 +46,7 @@ import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 
 /**
@@ -56,8 +58,12 @@ public class ByCategoryFragment extends Fragment implements TransactionsFragment
 
     @BindView(R.id.spinner_categories)
     protected Spinner mCategoriesSpinner;
+    @BindView(R.id.transactions_list_view)
+    protected ListView mListView;
     @Nullable @BindView(R.id.bar_chart)
     protected BarChart mBarChartView;
+    @Nullable @BindView(R.id.fab)
+    protected FloatingActionButton mFloatingActionButton;
 
     private ArrayAdapter<String> mCategoriesAdapter;
     private TransactionsAdapter mAdapter;
@@ -98,6 +104,19 @@ public class ByCategoryFragment extends Fragment implements TransactionsFragment
         } else {
             MainActivity activity = (MainActivity) getActivity();
             setTransactions(activity.getTransactions());
+        }
+    }
+
+    @OnClick(R.id.fab)
+    public void onPageViewToggled() {
+        if (mListView.getVisibility() == View.VISIBLE) {
+            mListView.setVisibility(View.GONE);
+            mBarChartView.setVisibility(View.VISIBLE);
+            mFloatingActionButton.setImageResource(R.drawable.ic_list);
+        } else {
+            mListView.setVisibility(View.VISIBLE);
+            mBarChartView.setVisibility(View.GONE);
+            mFloatingActionButton.setImageResource(R.drawable.ic_bar_chart);
         }
     }
 
