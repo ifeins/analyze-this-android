@@ -18,8 +18,6 @@ import android.support.v4.util.Pair;
 
 import com.example.ifeins.analyze.fragments.AllTransactionsFragment;
 import com.example.ifeins.analyze.fragments.ByCategoryFragment;
-import com.example.ifeins.analyze.fragments.ByMerchantFragment;
-import com.example.ifeins.analyze.fragments.NoTransactionsFragment;
 import com.example.ifeins.analyze.fragments.OverviewFragment;
 import com.example.ifeins.analyze.fragments.TransactionsFragment;
 import com.example.ifeins.analyze.models.Transaction;
@@ -33,7 +31,6 @@ import java.util.List;
 public class TabsAdapter extends FragmentPagerAdapter {
 
     private List<Pair<String, Fragment>> mFragments = new ArrayList<>();
-    private Fragment mEmptyStateFragment = new NoTransactionsFragment();
     private boolean mTransactionsExist;
 
     public TabsAdapter(FragmentManager fm) {
@@ -48,7 +45,7 @@ public class TabsAdapter extends FragmentPagerAdapter {
         if (mTransactionsExist) {
             return mFragments.get(position).second;
         } else {
-            return mEmptyStateFragment;
+            return mFragments.get(0).second;
         }
     }
 

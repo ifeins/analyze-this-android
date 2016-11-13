@@ -8,12 +8,14 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.example.ifeins.analyze.R;
 import com.example.ifeins.analyze.models.Transaction;
 import com.example.ifeins.analyze.models.TransactionsCache;
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
@@ -45,6 +47,8 @@ public class OverviewFragment extends Fragment implements TransactionsFragment {
 
     @BindView(R.id.pie_chart_view)
     protected PieChart mPieChartView;
+    @BindView(R.id.empty_state_view)
+    protected TextView mEmptyStateView;
 
     public OverviewFragment() {
         // Required empty public constructor
@@ -63,17 +67,22 @@ public class OverviewFragment extends Fragment implements TransactionsFragment {
         ButterKnife.bind(this, view);
 
         mPieChartView.setDescription(null);
+        mPieChartView.setUsePercentValues(true);
         mPieChartView.setDrawHoleEnabled(true);
         mPieChartView.setHoleColor(Color.WHITE);
         mPieChartView.setHoleRadius(58f);
         mPieChartView.setDrawCenterText(true);
         mPieChartView.setCenterText("Spending overview");
         mPieChartView.setCenterTextSize(20);
+        mPieChartView.setExtraOffsets(20.f, 0.f, 20.f, 0.f);
+        mPieChartView.setDrawEntryLabels(false);
 
-        List<Transaction> transactions = TransactionsCache.getInstance().getTransactions();
-        if (transactions != null && !transactions.isEmpty()) {
-            initPieChart(transactions);
-        }
+        Legend legend = mPieChartView.getLegend();
+        legend.setPosition(Legend.LegendPosition.BELOW_CHART_LEFT);
+        legend.setOrientation(Legend.LegendOrientation.VERTICAL);
+        legend.setDrawInside(false);
+
+        setTransactions(TransactionsCache.getInstance().getTransactions());
     }
 
     @Override
@@ -82,7 +91,14 @@ public class OverviewFragment extends Fragment implements TransactionsFragment {
             return;
         }
 
-        initPieChart(transactions);
+        if (transactions != null && !transactions.isEmpty()) {
+            mEmptyStateView.setVisibility(View.GONE);
+            mPieChartView.setVisibility(View.VISIBLE);
+            initPieChart(transactions);
+        } else {
+            mEmptyStateView.setVisibility(View.VISIBLE);
+            mPieChartView.setVisibility(View.GONE);
+        }
     }
 
     private void initPieChart(List<Transaction> transactions) {
@@ -91,10 +107,12 @@ public class OverviewFragment extends Fragment implements TransactionsFragment {
         dataSet.setSliceSpace(3f);
         dataSet.setSelectionShift(5f);
         dataSet.setColors(ColorTemplate.PASTEL_COLORS);
+        dataSet.setYValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
+
         PieData data = new PieData(dataSet);
         data.setValueTextSize(11f);
-        data.setValueTextColor(Color.WHITE);
-        data.setValueFormatter(new MoneyFormatter());
+        data.setValueTextColor(Color.BLACK);
+        data.setValueFormatter(new PercentFormatter());
         mPieChartView.setData(data);
         mPieChartView.animateY(PIE_CHART_ANIMATION_DURATION_MILLIS, Easing.EasingOption.EaseInOutQuad);
     }
@@ -127,11 +145,11 @@ public class OverviewFragment extends Fragment implements TransactionsFragment {
         return pieEntries;
     }
 
-    private static class MoneyFormatter implements ValueFormatter {
+    private static class PercentFormatter implements ValueFormatter {
 
         @Override
         public String getFormattedValue(float value, Entry entry, int dataSetIndex, ViewPortHandler viewPortHandler) {
-            return String.format("₪%d", Math.round(value));
+            return Math.round(value) + "%";
         }
     }
 }
