@@ -53,7 +53,6 @@ public class ByCategoryFragment extends Fragment implements TransactionsFragment
 
     private Spinner mCategoriesSpinner;
     private ArrayAdapter<String> mCategoriesAdapter;
-    private ListView mListView;
     private TransactionsAdapter mAdapter;
     private BarChart mBarChartView;
 
@@ -81,7 +80,27 @@ public class ByCategoryFragment extends Fragment implements TransactionsFragment
         mCategoriesSpinner.setAdapter(mCategoriesAdapter);
         mCategoriesSpinner.setOnItemSelectedListener(this);
 
+        initChart(view);
+
+        ListView listView = (ListView) view.findViewById(R.id.transactions_list_view);
+        mAdapter = new TransactionsAdapter(getActivity());
+        listView.setAdapter(mAdapter);
+
+        if (mCategories != null && mTransactions != null) {
+            updateUI();
+        } else {
+            MainActivity activity = (MainActivity) getActivity();
+            setTransactions(activity.getTransactions());
+        }
+    }
+
+    private void initChart(View view) {
         mBarChartView = (BarChart) view.findViewById(R.id.bar_chart);
+        if (mBarChartView == null) {
+            // only available in larger devices
+            return;
+        }
+
         mBarChartView.setDescription(null);
         XAxis xAxis = mBarChartView.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
@@ -92,17 +111,6 @@ public class ByCategoryFragment extends Fragment implements TransactionsFragment
         axisLeft.setValueFormatter(new AmountValueFormatter());
         axisLeft.setPosition(YAxis.YAxisLabelPosition.OUTSIDE_CHART);
         mBarChartView.getAxisRight().setDrawLabels(false);
-
-        mListView = (ListView) view.findViewById(R.id.transactions_list_view);
-        mAdapter = new TransactionsAdapter(getActivity());
-        mListView.setAdapter(mAdapter);
-
-        if (mCategories != null && mTransactions != null) {
-            updateUI();
-        } else {
-            MainActivity activity = (MainActivity) getActivity();
-            setTransactions(activity.getTransactions());
-        }
     }
 
     @Override

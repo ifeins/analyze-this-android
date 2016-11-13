@@ -1,22 +1,12 @@
-<android.support.percent.PercentFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                                            xmlns:tools="http://schemas.android.com/tools"
-                                            xmlns:app="http://schemas.android.com/apk/res-auto"
-                                            android:layout_width="match_parent"
-                                            android:layout_height="match_parent"
-                                            tools:context="com.example.ifeins.analyze.fragments.AllTransactionsFragment">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:tools="http://schemas.android.com/tools"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             tools:context="com.example.ifeins.analyze.fragments.AllTransactionsFragment">
 
     <ListView
         android:id="@+id/transactions_list_view"
         android:layout_width="match_parent"
-        app:layout_widthPercent="50%"
         android:layout_height="wrap_content"/>
 
-    <com.github.mikephil.charting.charts.BarChart
-        android:id="@+id/bar_chart"
-        android:layout_width="match_parent"
-        app:layout_marginStartPercent="50%"
-        app:layout_widthPercent="50%"
-        android:layout_height="match_parent"
-        android:layout_gravity="center_vertical"/>
-
-</android.support.percent.PercentFrameLayout>
+</FrameLayout>

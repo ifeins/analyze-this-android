@@ -63,7 +63,23 @@ public class AllTransactionsFragment extends Fragment implements TransactionsFra
         super.onViewCreated(view, savedInstanceState);
         mListView = (ListView) view.findViewById(R.id.transactions_list_view);
 
+        initializeBarChart(view);
+
+        MainActivity activity = (MainActivity) getActivity();
+        List<Transaction> transactions = activity.getTransactions();
+        mAdapter = new TransactionsAdapter(getActivity(), transactions);
+        mListView.setAdapter(mAdapter);
+
+        addTransactionsToChart(transactions);
+    }
+
+    private void initializeBarChart(View view) {
         mBarChartView = (BarChart) view.findViewById(R.id.bar_chart);
+        if (mBarChartView == null) {
+            // only available on larger devices
+            return;
+        }
+
         mBarChartView.setDescription(null);
         XAxis xAxis = mBarChartView.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
@@ -74,13 +90,6 @@ public class AllTransactionsFragment extends Fragment implements TransactionsFra
         axisLeft.setValueFormatter(new AmountValueFormatter());
         axisLeft.setPosition(YAxis.YAxisLabelPosition.OUTSIDE_CHART);
         mBarChartView.getAxisRight().setDrawLabels(false);
-
-        MainActivity activity = (MainActivity) getActivity();
-        List<Transaction> transactions = activity.getTransactions();
-        mAdapter = new TransactionsAdapter(getActivity(), transactions);
-        mListView.setAdapter(mAdapter);
-
-        addTransactionsToChart(transactions);
     }
 
     @Override
@@ -121,6 +130,10 @@ public class AllTransactionsFragment extends Fragment implements TransactionsFra
     }
 
     private void addTransactionsToChart(List<Transaction> transactions) {
+        if (mBarChartView == null) {
+            return;
+        }
+
         if (!transactions.isEmpty()) {
             List<BarEntry> entries = transactionsToBarEntries(transactions);
             BarDataSet dataSet = new BarDataSet(entries, "Money spent by month");
