@@ -34,6 +34,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * A simple {@link Fragment} subclass.
  */
@@ -43,7 +46,8 @@ public class OverviewFragment extends Fragment implements TransactionsFragment {
 
     private static final String LOG_TAG = OverviewFragment.class.getSimpleName();
 
-    private PieChart mPieChartView;
+    @BindView(R.id.pie_chart_view)
+    protected PieChart mPieChartView;
 
     public OverviewFragment() {
         // Required empty public constructor
@@ -59,8 +63,8 @@ public class OverviewFragment extends Fragment implements TransactionsFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        ButterKnife.bind(this, view);
 
-        mPieChartView = (PieChart) view.findViewById(R.id.pie_chart_view);
         mPieChartView.setDescription(null);
         mPieChartView.setDrawHoleEnabled(true);
         mPieChartView.setHoleColor(Color.WHITE);

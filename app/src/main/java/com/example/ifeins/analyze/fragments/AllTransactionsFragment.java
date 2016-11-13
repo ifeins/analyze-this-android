@@ -36,6 +36,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Optional;
+
 /**
  * A simple {@link Fragment} subclass.
  */
@@ -43,9 +47,12 @@ public class AllTransactionsFragment extends Fragment implements TransactionsFra
 
     private static final int BAR_ANIMATION_DURATION_MILLIS = 1000;
 
-    private ListView mListView;
+    @BindView(R.id.transactions_list_view)
+    protected ListView mListView;
+    @Nullable @BindView(R.id.bar_chart)
+    protected BarChart mBarChartView;
+
     private TransactionsAdapter mAdapter;
-    private BarChart mBarChartView;
 
     public AllTransactionsFragment() {
         // Required empty public constructor
@@ -61,7 +68,7 @@ public class AllTransactionsFragment extends Fragment implements TransactionsFra
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mListView = (ListView) view.findViewById(R.id.transactions_list_view);
+        ButterKnife.bind(this, view);
 
         initializeBarChart(view);
 
@@ -74,7 +81,6 @@ public class AllTransactionsFragment extends Fragment implements TransactionsFra
     }
 
     private void initializeBarChart(View view) {
-        mBarChartView = (BarChart) view.findViewById(R.id.bar_chart);
         if (mBarChartView == null) {
             // only available on larger devices
             return;

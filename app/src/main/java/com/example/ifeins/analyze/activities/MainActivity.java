@@ -34,6 +34,8 @@ import com.google.android.gms.drive.OpenFileActivityBuilder;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -48,9 +50,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public static final int RC_RESOLVE_CONNECTION = 2;
     public static final int RC_ERROR_DIALOG = 3;
 
+    @BindView(R.id.tab_layout)
+    protected TabLayout mTabLayout;
+    @BindView(R.id.pager)
+    protected ViewPager mViewPager;
+
     private TabsAdapter mAdapter;
-    private TabLayout mTabLayout;
-    private ViewPager mViewPager;
 
     private List<Transaction> mTransactions = new ArrayList<>();
     private GoogleApiClient mGoogleApiClient;
@@ -61,12 +66,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
         mAdapter = new TabsAdapter(getSupportFragmentManager());
-        mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mAdapter);
-
-        mTabLayout = (TabLayout) findViewById(R.id.tab_layout);
         mTabLayout.setupWithViewPager(mViewPager);
 
         if (savedInstanceState != null) {

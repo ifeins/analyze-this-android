@@ -43,6 +43,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -51,10 +54,13 @@ public class ByCategoryFragment extends Fragment implements TransactionsFragment
 
     private static final int BAR_ANIMATION_DURATION_MILLIS = 1000;
 
-    private Spinner mCategoriesSpinner;
+    @BindView(R.id.spinner_categories)
+    protected Spinner mCategoriesSpinner;
+    @Nullable @BindView(R.id.bar_chart)
+    protected BarChart mBarChartView;
+
     private ArrayAdapter<String> mCategoriesAdapter;
     private TransactionsAdapter mAdapter;
-    private BarChart mBarChartView;
 
     private Set<String> mCategories;
     private List<Transaction> mTransactions;
@@ -74,7 +80,8 @@ public class ByCategoryFragment extends Fragment implements TransactionsFragment
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mCategoriesSpinner = (Spinner) view.findViewById(R.id.spinner_categories);
+        ButterKnife.bind(this, view);
+
         mCategoriesAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item);
         mCategoriesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mCategoriesSpinner.setAdapter(mCategoriesAdapter);
@@ -95,7 +102,6 @@ public class ByCategoryFragment extends Fragment implements TransactionsFragment
     }
 
     private void initChart(View view) {
-        mBarChartView = (BarChart) view.findViewById(R.id.bar_chart);
         if (mBarChartView == null) {
             // only available in larger devices
             return;
