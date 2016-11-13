@@ -20,6 +20,7 @@ import com.example.ifeins.analyze.adapters.TabsAdapter;
 import com.example.ifeins.analyze.api.AnalyzeApi;
 import com.example.ifeins.analyze.api.AnalyzeApiHelper;
 import com.example.ifeins.analyze.models.Transaction;
+import com.example.ifeins.analyze.models.TransactionsCache;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -42,7 +43,6 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
-    private static final String STATE_TRANSACTIONS = "transactions";
     private static final String STATE_TRANSACTIONS_FETCHED = "transactions_fetched";
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
@@ -57,7 +57,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     private TabsAdapter mAdapter;
 
-    private List<Transaction> mTransactions = new ArrayList<>();
     private GoogleApiClient mGoogleApiClient;
     private DisplayFileTitleCallback mDisplayFileTitleCallback;
     private boolean mTransactionsFetched;
@@ -73,7 +72,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         mTabLayout.setupWithViewPager(mViewPager);
 
         if (savedInstanceState != null) {
-            mTransactions = savedInstanceState.getParcelableArrayList(STATE_TRANSACTIONS);
             mTransactionsFetched = savedInstanceState.getBoolean(STATE_TRANSACTIONS_FETCHED);
         }
 
@@ -153,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         transactionsCall.enqueue(new Callback<List<Transaction>>() {
             @Override
             public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
-                mTransactions = response.body();
+                TransactionsCache.getInstance().setTransactions(response.body());
                 mTransactionsFetched = true;
                 updateTransactions();
             }
@@ -167,22 +165,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     private void updateTransactions() {
-        if (mTransactions == null || mTransactions.isEmpty()) {
+        List<Transaction> transactions = TransactionsCache.getInstance().getTransactions();
+        if (transactions == null || transactions.isEmpty()) {
             mTabLayout.setVisibility(View.GONE);
         } else {
             mTabLayout.setVisibility(View.VISIBLE);
         }
-        mAdapter.setTransactions(mTransactions);
-    }
-
-    public List<Transaction> getTransactions() {
-        return mTransactions;
+        mAdapter.setTransactions(transactions);
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelableArrayList(STATE_TRANSACTIONS, (ArrayList<? extends Parcelable>) mTransactions);
         outState.putBoolean(STATE_TRANSACTIONS_FETCHED, mTransactionsFetched);
     }
 

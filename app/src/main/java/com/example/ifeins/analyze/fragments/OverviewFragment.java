@@ -3,18 +3,15 @@ package com.example.ifeins.analyze.fragments;
 
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.ifeins.analyze.R;
-import com.example.ifeins.analyze.activities.MainActivity;
-import com.example.ifeins.analyze.models.Category;
 import com.example.ifeins.analyze.models.Transaction;
+import com.example.ifeins.analyze.models.TransactionsCache;
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.data.Entry;
@@ -73,8 +70,7 @@ public class OverviewFragment extends Fragment implements TransactionsFragment {
         mPieChartView.setCenterText("Spending overview");
         mPieChartView.setCenterTextSize(20);
 
-        MainActivity activity = (MainActivity) getActivity();
-        List<Transaction> transactions = activity.getTransactions();
+        List<Transaction> transactions = TransactionsCache.getInstance().getTransactions();
         if (transactions != null && !transactions.isEmpty()) {
             initPieChart(transactions);
         }

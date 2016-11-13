@@ -11,9 +11,9 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 
 import com.example.ifeins.analyze.R;
-import com.example.ifeins.analyze.activities.MainActivity;
 import com.example.ifeins.analyze.adapters.TransactionsAdapter;
 import com.example.ifeins.analyze.models.Transaction;
+import com.example.ifeins.analyze.models.TransactionsCache;
 import com.example.ifeins.analyze.utils.AmountValueFormatter;
 import com.example.ifeins.analyze.utils.MonthValueFormatter;
 import com.github.mikephil.charting.charts.BarChart;
@@ -40,7 +40,6 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import butterknife.Optional;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -76,8 +75,7 @@ public class AllTransactionsFragment extends Fragment implements TransactionsFra
 
         initializeBarChart(view);
 
-        MainActivity activity = (MainActivity) getActivity();
-        List<Transaction> transactions = activity.getTransactions();
+        List<Transaction> transactions = TransactionsCache.getInstance().getTransactions();
         mAdapter = new TransactionsAdapter(getActivity(), transactions);
         mListView.setAdapter(mAdapter);
 

@@ -14,9 +14,9 @@ import android.widget.ListView;
 import android.widget.Spinner;
 
 import com.example.ifeins.analyze.R;
-import com.example.ifeins.analyze.activities.MainActivity;
 import com.example.ifeins.analyze.adapters.TransactionsAdapter;
 import com.example.ifeins.analyze.models.Transaction;
+import com.example.ifeins.analyze.models.TransactionsCache;
 import com.example.ifeins.analyze.utils.AmountValueFormatter;
 import com.example.ifeins.analyze.utils.MonthValueFormatter;
 import com.github.mikephil.charting.charts.BarChart;
@@ -102,8 +102,7 @@ public class ByCategoryFragment extends Fragment implements TransactionsFragment
         if (mCategories != null && mTransactions != null) {
             updateUI();
         } else {
-            MainActivity activity = (MainActivity) getActivity();
-            setTransactions(activity.getTransactions());
+            setTransactions(TransactionsCache.getInstance().getTransactions());
         }
     }
 
@@ -227,8 +226,8 @@ public class ByCategoryFragment extends Fragment implements TransactionsFragment
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         String category = (String) mCategoriesSpinner.getAdapter().getItem(position);
-        MainActivity activity = (MainActivity) getActivity();
-        Collection<Transaction> transactionsByCategory = getTransactionsByCategory(activity.getTransactions(), category);
+        Collection<Transaction> transactionsByCategory = getTransactionsByCategory(
+                TransactionsCache.getInstance().getTransactions(), category);
         mTransactions = new ArrayList<>(transactionsByCategory);
 
         updateUI();
