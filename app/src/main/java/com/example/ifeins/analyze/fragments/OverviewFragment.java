@@ -42,6 +42,8 @@ import butterknife.ButterKnife;
 public class OverviewFragment extends Fragment implements TransactionsFragment {
 
     private static final int PIE_CHART_ANIMATION_DURATION_MILLIS = 1000;
+    // only showing categories that are more than 3%
+    private static final float PIE_ENTRY_THRESHOLD = 0.03f;
 
     private static final String LOG_TAG = OverviewFragment.class.getSimpleName();
 
@@ -118,6 +120,12 @@ public class OverviewFragment extends Fragment implements TransactionsFragment {
     }
 
     private List<PieEntry> chartEntriesFromTransactions(final List<Transaction> transactions) {
+        int totalTransactionsSum = 0;
+        for (Transaction transaction : transactions) {
+            totalTransactionsSum += transaction.amount;
+        }
+        totalTransactionsSum = Math.round(totalTransactionsSum / 100.f);
+
         Function<Transaction, String> transactionsCategoryFunction = new Function<Transaction, String>() {
             @Override
             public String apply(Transaction input) {
@@ -138,8 +146,17 @@ public class OverviewFragment extends Fragment implements TransactionsFragment {
         }
 
         List<PieEntry> pieEntries = new ArrayList<>();
+        int otherCategorySum = 0;
         for (String category : moneyPerCategory.keySet()) {
-            pieEntries.add(new PieEntry(moneyPerCategory.get(category), category));
+            int categoryValue = moneyPerCategory.get(category);
+            if (categoryValue > totalTransactionsSum * PIE_ENTRY_THRESHOLD) {
+                pieEntries.add(new PieEntry(categoryValue, category));
+            } else {
+                otherCategorySum += categoryValue;
+            }
+        }
+        if (otherCategorySum > 0) {
+            pieEntries.add(new PieEntry(otherCategorySum, "Other"));
         }
 
         return pieEntries;
