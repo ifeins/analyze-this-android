@@ -19,8 +19,11 @@ import com.example.ifeins.analyze.R;
 import com.example.ifeins.analyze.adapters.TabsAdapter;
 import com.example.ifeins.analyze.api.AnalyzeApi;
 import com.example.ifeins.analyze.api.AnalyzeApiHelper;
+import com.example.ifeins.analyze.api.ApiError;
+import com.example.ifeins.analyze.api.ErrorUtils;
 import com.example.ifeins.analyze.models.Transaction;
 import com.example.ifeins.analyze.models.TransactionsCache;
+import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -32,14 +35,18 @@ import com.google.android.gms.drive.DriveResource;
 import com.google.android.gms.drive.Metadata;
 import com.google.android.gms.drive.OpenFileActivityBuilder;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
+import retrofit2.Converter;
 import retrofit2.Response;
+import retrofit2.Retrofit;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
@@ -217,7 +224,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 importCall.enqueue(new Callback<Void>() {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> response) {
-                        fetchTransactions();
+                        if (response.isSuccessful()) {
+                            fetchTransactions();
+                        } else {
+                            ApiError apiError = ErrorUtils.parseError(MainActivity.this, response);
+                            if (apiError.getCode() == ApiError.ErrorCode.INSUFFICIENT_PERMISSIONS) {
+                                Toast.makeText(MainActivity.this, "Failed to import document due to insufficient permissions", Toast.LENGTH_SHORT).show();
+                            }
+                            Toast.makeText(MainActivity.this, "Failed to import document", Toast.LENGTH_SHORT).show();
+                        }
                     }
 
                     @Override
