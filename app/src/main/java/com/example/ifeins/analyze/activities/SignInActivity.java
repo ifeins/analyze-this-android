@@ -16,7 +16,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.ifeins.analyze.R;
@@ -29,17 +28,12 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.Scope;
-import com.google.android.gms.drive.Drive;
 
-import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * @author ifeins
@@ -47,8 +41,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class SignInActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
     private static final int RC_SIGN_IN = 1;
+
     private GoogleApiClient mGoogleApiClient;
-    private static final boolean REFRESH_TOKENS = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,10 +52,8 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         ButterKnife.bind(this);
         GoogleSignInOptions signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.server_client_id))
-                .requestServerAuthCode(getString(R.string.server_client_id), REFRESH_TOKENS)
                 .requestEmail()
                 .requestProfile()
-                .requestScopes(new Scope("https://www.googleapis.com/auth/drive.readonly"))
                 .build();
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this, this)
@@ -81,7 +73,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if (result.isSuccess()) {
                 GoogleSignInAccount account = result.getSignInAccount();
-                syncWithServer(account.getIdToken(), account.getServerAuthCode());
+                syncWithServer(account.getIdToken());
             }
         }
     }
@@ -92,9 +84,9 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
-    private void syncWithServer(String idToken, String authCode) {
+    private void syncWithServer(String idToken) {
         AnalyzeApi api = AnalyzeApiHelper.createApi(this);
-        Call<User> signInCall = api.signIn(idToken, authCode, REFRESH_TOKENS);
+        Call<User> signInCall = api.signInWithGoogle(idToken);
         signInCall.enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {

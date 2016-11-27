@@ -3,7 +3,6 @@ package com.example.ifeins.analyze.activities;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -23,30 +22,29 @@ import com.example.ifeins.analyze.api.ApiError;
 import com.example.ifeins.analyze.api.ErrorUtils;
 import com.example.ifeins.analyze.models.Transaction;
 import com.example.ifeins.analyze.models.TransactionsCache;
-import com.google.android.gms.auth.GoogleAuthUtil;
+import com.example.ifeins.analyze.utils.DriveUtils;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.drive.Drive;
+import com.google.android.gms.drive.DriveApi;
+import com.google.android.gms.drive.DriveFile;
 import com.google.android.gms.drive.DriveId;
-import com.google.android.gms.drive.DriveResource;
-import com.google.android.gms.drive.Metadata;
 import com.google.android.gms.drive.OpenFileActivityBuilder;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
+import java.io.File;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import okhttp3.ResponseBody;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
-import retrofit2.Converter;
 import retrofit2.Response;
-import retrofit2.Retrofit;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
@@ -65,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private TabsAdapter mAdapter;
 
     private GoogleApiClient mGoogleApiClient;
-    private DisplayFileTitleCallback mDisplayFileTitleCallback;
+    private FileDownloadCallback mFileDownloadCallback;
     private boolean mTransactionsFetched;
 
     @Override
@@ -142,9 +140,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             case RC_OPEN_FILE:
                 if (resultCode == RESULT_OK) {
                     DriveId fileId = data.getParcelableExtra(OpenFileActivityBuilder.EXTRA_RESPONSE_DRIVE_ID);
-                    PendingResult<DriveResource.MetadataResult> result = fileId.asDriveFile().getMetadata(mGoogleApiClient);
-                    mDisplayFileTitleCallback = new DisplayFileTitleCallback();
-                    result.setResultCallback(mDisplayFileTitleCallback);
+                    PendingResult<DriveApi.DriveContentsResult> result = fileId.asDriveFile().open(mGoogleApiClient, DriveFile.MODE_READ_ONLY, null);
+                    mFileDownloadCallback = new FileDownloadCallback();
+                    result.setResultCallback(mFileDownloadCallback);
                 }
                 break;
             default:
@@ -212,38 +210,42 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     /** End Google API callbacks **/
 
-    private class DisplayFileTitleCallback implements ResultCallback<DriveResource.MetadataResult> {
+    private class FileDownloadCallback implements ResultCallback<DriveApi.DriveContentsResult> {
 
         @Override
-        public void onResult(@NonNull DriveResource.MetadataResult metadataResult) {
-            if (metadataResult.getStatus().isSuccess()) {
-                Metadata metadata = metadataResult.getMetadata();
-                Toast.makeText(MainActivity.this, "Importing file: " + metadata.getTitle(), Toast.LENGTH_SHORT).show();
-                String driveId = metadata.getDriveId().getResourceId();
-                Call<Void> importCall = AnalyzeApiHelper.createApi(MainActivity.this).importGoogleDriveResource(driveId);
-                importCall.enqueue(new Callback<Void>() {
-                    @Override
-                    public void onResponse(Call<Void> call, Response<Void> response) {
-                        if (response.isSuccessful()) {
-                            fetchTransactions();
-                        } else {
-                            ApiError apiError = ErrorUtils.parseError(MainActivity.this, response);
-                            if (apiError.getCode() == ApiError.ErrorCode.INSUFFICIENT_PERMISSIONS) {
-                                Toast.makeText(MainActivity.this, "Failed to import document due to insufficient permissions", Toast.LENGTH_SHORT).show();
-                            }
-                            Toast.makeText(MainActivity.this, "Failed to import document", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<Void> call, Throwable t) {
-                        Toast.makeText(MainActivity.this, "Failed to import document", Toast.LENGTH_SHORT).show();
-                    }
-                });
+        public void onResult(@NonNull DriveApi.DriveContentsResult result) {
+            final File tempFile;
+            if (result.getStatus().isSuccess()) {
+                tempFile = DriveUtils.createTempFileForDriveDocument(MainActivity.this.getCacheDir(), result.getDriveContents());
             } else {
-                String errorMessage = metadataResult.getStatus().getStatusMessage();
-                Toast.makeText(MainActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, result.getStatus().getStatusMessage(), Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), tempFile);
+            MultipartBody.Part body = MultipartBody.Part.create(requestBody);
+            String documentId = result.getDriveContents().getDriveId().getResourceId();
+            Call<Void> importDocumentCall = AnalyzeApiHelper.createApi(MainActivity.this).createDocument(documentId, body);
+            importDocumentCall.enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    tempFile.delete();
+                    if (response.isSuccessful()) {
+                        fetchTransactions();
+                    } else {
+                        ApiError apiError = ErrorUtils.parseError(MainActivity.this, response);
+                        Toast.makeText(MainActivity.this, "Failed to import document: " + apiError.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    tempFile.delete();
+                    Toast.makeText(MainActivity.this, "Failed to import document", Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     }
+
+
 }
